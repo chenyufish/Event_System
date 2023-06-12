@@ -1,0 +1,880 @@
+#include <iostream>
+#include<iomanip>
+#include <unordered_map>
+#include <queue>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <functional>
+#include<Windows.h>
+using namespace std;
+
+//定义储存team的一个结构体
+struct event {
+    int id;
+    string name;
+    string school;
+    string category;
+    string participant;
+    string teacher;
+};
+
+//二叉树结构体
+struct Tree_Node {
+    event data;
+    Tree_Node* left;
+    Tree_Node* right;
+};
+
+
+//将数据以二叉排序树的形式插入
+Tree_Node* insertNode(Tree_Node* root, event data) {
+    if (root == nullptr) {
+        Tree_Node* newNode = new Tree_Node{ data, nullptr, nullptr };
+        return newNode;
+    }
+
+    if (data.id < root->data.id) {
+        root->left = insertNode(root->left, data);
+    }
+    else {
+        root->right = insertNode(root->right, data);
+    }
+    return root;
+}
+
+//增加参赛队伍信息功能
+Tree_Node* addNode(Tree_Node* root, event data) {
+    if (root == nullptr) {
+        Tree_Node* newNode = new Tree_Node{ data, nullptr, nullptr };
+        return newNode;
+    }
+
+    if (data.id < root->data.id) {
+        root->left = addNode(root->left, data);
+    }
+    else {
+        root->right = addNode(root->right, data);
+    }
+
+    return root;
+}
+
+//跳过并输出第一行    
+char buf[1024];
+ifstream& seek_to_line(ifstream& in, int line)
+//将打开的文件in，定位到line行。
+{
+    int i;
+    in.seekg(0, ios::beg);  //定位到文件开始
+    for (i = 0; i < line; i++)
+    {
+        in.getline(buf, sizeof(buf));//读取行
+    }
+    cout << buf << endl;
+    return in;
+}
+//从team中读取的数据
+event parseLine(string line) {
+    event c;
+    stringstream ss(line);
+    string field;
+
+    if (getline(ss, field, '#')) {
+        c.id = stoi(field);
+    }
+    else {
+        throw runtime_error("Missing id");
+    }
+
+    if (getline(ss, c.name, '#')) {
+        c.name.erase(remove_if(c.name.begin(), c.name.end(), ::isspace), c.name.end());
+    }
+    else {
+        throw runtime_error("Missing name");
+    }
+
+    if (getline(ss, c.school, '#')) {
+        c.school.erase(remove_if(c.school.begin(), c.school.end(), ::isspace), c.school.end());
+    }
+    else {
+        throw runtime_error("Missing school");
+    }
+
+    if (getline(ss, c.category, '#')) {
+        c.category.erase(remove_if(c.category.begin(), c.category.end(), ::isspace), c.category.end());
+    }
+    else {
+        throw runtime_error("Missing category");
+    }
+
+    if (getline(ss, c.participant, '#')) {
+        c.participant.erase(remove_if(c.participant.begin(), c.participant.end(), ::isspace), c.participant.end());
+    }
+    else {
+        throw runtime_error("Missing participant");
+    }
+
+    if (getline(ss, c.teacher, '#')) {
+        c.teacher.erase(remove_if(c.teacher.begin(), c.teacher.end(), ::isspace), c.teacher.end());
+    }
+    else {
+        throw runtime_error("Missing teacher");
+    }
+
+    return c;
+}
+
+void InOderTraverse(Tree_Node* bst)//按照中序排列输出
+{
+    if (bst == nullptr) return;
+    if (nullptr != bst)
+    {
+        if (bst->left) InOderTraverse(bst->left);
+        cout << bst->data.id << "\t" << bst->data.name << "\t" << bst->data.school << "\t" << bst->data.category << "\t" << bst->data.participant << "\t" << bst->data.teacher << endl;
+        if (bst->right) InOderTraverse(bst->right);
+    }
+}
+//根据id查找队伍
+//记录查找长度
+int findDepthSum, findNum;
+Tree_Node* search_id(Tree_Node* root, int id, int depth) {
+    if (root == nullptr || root->data.id == id) {
+        findDepthSum += depth;
+        return root;
+    }
+
+    if (id < root->data.id) {
+        return search_id(root->left, id, depth + 1);
+    }
+    else {
+        return search_id(root->right, id, depth + 1);
+    }
+}
+
+// 收集学校队伍信息到容器中
+void collect_school(Tree_Node* root, vector<event>& teams) {
+    if (root == nullptr) {
+        return;
+    }
+    teams.push_back(root->data);
+    collect_school(root->left, teams);
+    collect_school(root->right, teams);
+}
+
+// 根据学校查找队伍信息并选择排序（按序号从小到大）
+void searchAndSortBySchool(Tree_Node* root, string school_name) {
+    if (root == nullptr) {
+
+        return;
+    }
+
+    if (root->data.school == school_name) {
+        vector<event> teams;
+        collect_school(root, teams);
+        if (!teams.empty()) {
+            cout << "队伍信息如下：" << endl;
+            sort(teams.begin(), teams.end(), [](const event& a, const event& b) {
+                return a.id < b.id;
+                });
+
+            for (const auto& team : teams) {
+                cout << team.id << "\t" << team.name << "\t" << team.school << "\t" << team.category << "\t" << team.participant << "\t" << team.teacher << endl;
+            }
+        }
+        else {
+            cout << "没有找到该学校的队伍信息" << endl;
+        }
+        return;
+    }
+
+    searchAndSortBySchool(root->left, school_name);
+    searchAndSortBySchool(root->right, school_name);
+}
+
+//根据id删除队伍
+Tree_Node* deleteNode(Tree_Node* root, int id) {
+    if (root == nullptr) {
+        return nullptr;
+    }
+
+    if (id < root->data.id) {
+        root->left = deleteNode(root->left, id);
+    }
+    else if (id > root->data.id) {
+        root->right = deleteNode(root->right, id);
+    }
+    else {
+        if (root->left == nullptr) {
+            Tree_Node* temp = root->right;
+            delete root;
+            return temp;
+        }
+        else if (root->right == nullptr) {
+            Tree_Node* temp = root->left;
+            delete root;
+            return temp;
+        }
+
+        Tree_Node* temp = root->right;
+        while (temp->left != nullptr) {
+            temp = temp->left;
+        }
+
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data.id);
+    }
+
+    return root;
+}
+
+//// 收集叫号队伍信息
+//vector<Tree_Node*> collectTeams(Tree_Node* bst) {
+//    vector<Tree_Node*> collect_teams;
+//    function<void(Tree_Node*)> collect = [&](Tree_Node* node) {
+//        if (node) {
+//            collect(node->left);
+//            collect_teams.push_back(node);
+//            collect(node->right);
+//        }
+//    };
+//    collect(bst);
+//    return collect_teams;
+//}
+//
+//// 对参赛队伍进行叫号
+//void callTeams(Tree_Node* Call_team) {
+//    int roomCount = 9;  // 9个房间
+//    vector<vector<Tree_Node*>> finalRooms(roomCount);//二维容器
+//
+//    vector<Tree_Node*> callteams = collectTeams(Call_team);
+//    for (Tree_Node* team : callteams) {
+//        int roomIndex = stoi(team->data.category) - 1;
+//        finalRooms[roomIndex].push_back(team);
+//    }
+//
+//    // 呼叫团队并模拟他们的延迟进入
+//    for (int roomIndex = 0; roomIndex < roomCount; roomIndex++) {
+//        cout << "决赛房间" << roomIndex + 1 << ":" << endl;
+//        for (Tree_Node* team : finalRooms[roomIndex]) {
+//            cout << "被叫到的队伍" << team->data.id << "来自" << team->data.school << endl;
+//            Sleep(10 * 1000);  // 延迟十秒叫入
+//        }
+//        cout << "决赛房间的所有队伍 " << roomIndex + 1 << " 都已经进入" << endl;
+//        cout << endl;
+//    }
+//}
+
+//叫号系统
+//赛区分类
+//void Call_Team(vector<event> team)
+//{
+//    vector<string> call_team;
+//    for (int i = 0; i < team.size(); i++)
+//    {
+//        if (std::find(call_team.begin(), call_team.end(), team[i].category()) == call_team.end())
+//        {
+//            call_team.push_back(team[i].category);
+//        }
+//        
+//    }
+//    for (int i = 0; i < call_team.size(); i++)
+//    {
+//        for (int m = 0; m < team.size(); m++)
+//        {
+//            if (i < 3)
+//            {
+//                if (call_team[i] ==team[m].category)
+//                {
+//                    room1.push_back(team[m]);
+//                }
+//            }
+//            if (i>=3&&i<=5)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room2.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 6 && i <= 8)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room3.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 9 && i <= 11)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room4.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 12 && i <= 14)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room5.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 15 && i <= 18)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room6.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 19 && i <= 22)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room7.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 23 && i <= 26)
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room8.push_back(team[m]);
+//                }
+//            }
+//            if (i >= 27 && i < call_team.size())
+//            {
+//                if (call_team[i] == team[m].category)
+//                {
+//                    room9.push_back(team[m]);
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//
+////获得你想要的赛区
+//vector<event> search_zone(int i)
+//{
+//    if (i == 1)
+//    {
+//        return room1;
+//    }
+//    if (i == 2)
+//    {
+//        return room2;
+//    }
+//    if (i == 3)
+//    {
+//        return room3;
+//    }
+//    if (i == 4)
+//    {
+//        return room4;
+//    }
+//    if (i == 5)
+//    {
+//        return room5;
+//    }
+//    if (i == 6)
+//    {
+//        return room6;
+//    }
+//    if (i == 7)
+//    {
+//        return room7;
+//    }
+//    if (i == 8)
+//    {
+//        return room8;
+//    }
+//    if (i == 9)
+//    {
+//        return room9;
+//    }
+//}
+//
+////进场顺序
+//void Approach_sequence(vector<event>& team)
+//{
+//    for (int i = 0; i < team.size(); i++)
+//    {
+//        cout<<"第"<<i+1<<" 个队伍编号为：" <<team[i].id << endl;
+//    }
+//}
+//
+////模拟叫号
+//void Call_system(vector<event> team)
+//{
+//    cout<<"模拟叫号如下： " << endl;
+//    int i = 0;
+//    while (i < team.size())
+//    {
+//        cout << "第" << i+1 << "次叫到的编号为：" << team[i].id<< endl;
+//        Sleep(2000);
+//        i++;
+//    }
+//}
+//
+
+
+
+
+//以下是导航系统
+// 导航系统
+
+// 地标结构体
+struct Landmark {
+    string name;         // 地标名称
+    string code;         // 地标代码
+    string description;  // 地标描述
+
+    Landmark() = default;  // 默认构造函数
+    Landmark(const string& name, const string& code, const string& description)
+        : name(name), code(code), description(description) {}
+};
+
+// 路径结构体
+struct Path {
+    string start;  // 起始地标代码
+    string end;    // 终点地标代码
+    int weight;    // 路径权重
+
+    Path(const string& start, const string& end, int weight)
+        : start(start), end(end), weight(weight) {}
+};
+
+// 地图类
+class Map {
+public:
+    // 添加地标
+    void addLandmark(const Landmark& landmark) {
+        landmarks[landmark.code] = landmark;
+    }
+
+    // 添加路径 
+    void addPath(const Path& path) {
+        paths[path.start][path.end] = path.weight;
+        paths[path.end][path.start] = path.weight;
+    }
+
+    // 获取地标描述
+    string getLandmarkDescription(const string& code) {
+        if (landmarks.count(code) > 0) {
+            return landmarks[code].description;
+        }
+        return "";
+    }
+
+    // 获取地标名称
+    string getLandmarkName(const std::string& code) {
+        if (landmarks.count(code) > 0) {
+            return landmarks[code].name;
+        }
+        return "";
+    }
+
+    // 导航函数，返回最短路径和总权重， 使用 Dijkstra 算法进行路径搜索
+    pair<vector<string>, int> navigate(const string& start, const string& end) {
+        
+        unordered_map<string, int> distance;          // 地标的距离
+        unordered_map<string, string> prev;            // 最短路径中的前驱节点
+        unordered_map<string, bool> visited;           // 记录节点的访问状态
+        priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> pq;  // 优先队列用于选择距离最短的节点
+
+        // 初始化距离、前驱节点和访问状态
+        for (auto& pair : landmarks) {
+            string code = pair.first;
+            distance[code] = INT_MAX;   // 初始化距离为无穷大
+            prev[code] = "";            // 前驱节点为空
+            visited[code] = false;      // 访问状态为未访问
+        }
+
+        distance[start] = 0;  // 起点到自身的距离为 0
+        pq.push(make_pair(0, start));  // 将起点加入优先队列
+
+        // 开始搜索最短路径
+        while (!pq.empty()) {
+            string current = pq.top().second;  // 获取当前距离最近的节点
+            pq.pop();
+
+            if (visited[current])
+                continue;
+
+            visited[current] = true;
+
+            if (current == end)
+                break;
+
+            // 遍历当前节点的相邻节点
+            if (paths.count(current) > 0) {
+                auto& neighbors = paths[current];
+
+                for (auto& pair : neighbors) {
+                    string neighbor = pair.first;
+                    int weight = pair.second;
+
+                    if (!visited[neighbor] && distance[current] + weight < distance[neighbor]) {
+                        distance[neighbor] = distance[current] + weight;
+                        prev[neighbor] = current;
+                        pq.push(make_pair(distance[neighbor], neighbor));
+                    }
+                }
+            }
+        }
+
+vector<string> shortestPath;  // 存储最短路径
+int totalWeight = distance[end];  // 总权重即为终点的最短距离
+
+        // 从终点往回回溯路径
+        if (prev[end] != "") {
+            string current = end;
+
+            while (current != "") {
+                shortestPath.push_back(current);
+                current = prev[current];
+            }
+
+            reverse(shortestPath.begin(), shortestPath.end());
+        }
+
+        return make_pair(shortestPath, totalWeight);
+    }
+
+    // 导航多个地标，返回整个路径和总权重
+    pair<vector<string>, int> navigateMultiple(const vector<string>& landmarks) {
+        vector<string> path;  // 路径
+        int totalWeight = 0;  // 总权重
+
+        if (landmarks.size() < 2)
+            return make_pair(path, totalWeight);
+
+        // 依次导航相邻的地标对
+        for (size_t i = 0; i < landmarks.size() - 1; i++) {
+            string start = landmarks[i];
+            string end = landmarks[i + 1];
+
+            // 导航两个地标之间的最短路径
+            pair<vector<string>, int> result = navigate(start, end);
+            vector<string> segmentPath = result.first;  // 分段路径
+            int segmentWeight = result.second;         // 分段权重
+
+            path.insert(path.end(), segmentPath.begin(), segmentPath.end());
+            totalWeight += segmentWeight;
+        }
+
+        return std::make_pair(path, totalWeight);
+    }
+
+private:
+    unordered_map<string, Landmark> landmarks;                // 地标集合
+    unordered_map<string, unordered_map<string, int>> paths; // 路径权重集合
+};
+
+
+int main() {
+    ifstream inputFile("team.txt");
+    if (!inputFile.is_open()) {
+        return 0;  
+    }
+
+    vector<event> contestants;
+    string line;
+
+    seek_to_line(inputFile, 1);  //定位到指定的行开始读取
+
+    while (getline(inputFile, line)) {
+        event c;
+        try {
+            c = parseLine(line);
+        }
+        catch (const exception& e) {
+            cerr << e.what() << ": " << line << endl;
+            continue;
+        }
+        contestants.push_back(c);
+    }
+
+    inputFile.close();
+
+    sort(contestants.begin(), contestants.end(), [](event a, event b) {
+        return a.id < b.id;
+        });
+
+    Tree_Node* root = nullptr;
+    for (auto c : contestants) {
+        root = addNode(root, c);
+    }
+
+    InOderTraverse(root);
+    cout << endl;
+    cout << endl;
+    while (true) {
+        cout << "**********************************赛事管理系统*********************************" << endl;
+        cout << "请选择功能"<< endl;
+        cout << "1.查询队伍信息           2.删除队伍信息     3.增加队伍信息      4.修改队伍信息" << endl;
+        cout << "5.对参赛队伍进行叫号     6.导航系统         0.退出系统                        " << endl;
+        cout << "******************************************************************************" << endl;
+
+        int choice;
+        cin >> choice;
+        switch (choice)
+        {
+        case 1:
+        {
+            cout << "1.按参赛编号进行查找      2.按参赛学校进行查找    " << endl;
+            int choice_1;
+            cin >> choice_1;
+            switch (choice_1)
+            {
+            case 1:
+            {
+                cout << "请输入编号查询队伍信息" << endl;
+                int searchId;
+                findDepthSum = 0;
+                findNum = 0;
+                cin >> searchId;
+                cin.get();
+                Tree_Node* foundNode = search_id(root, searchId, 1);
+                if (foundNode != nullptr) {
+                    cout << "这个编号的队伍是： " << searchId << endl;
+                    cout << buf << endl;
+                    cout << foundNode->data.id << "\t" << foundNode->data.name << "\t" << foundNode->data.school << "\t" << foundNode->data.category << "\t" << foundNode->data.participant << "\t" << foundNode->data.teacher << endl;
+                    cout << "查找成功！平均查找长度(ALS)：" << 1<< endl;
+                }
+                else {
+                    cout << "查找失败！没有这个ID的队伍 " << searchId << endl;
+                }
+                break;
+            }
+            case 2:
+            {
+                cout << "请输入想要查找的学校" << endl;
+                string searchSL;
+                cin >> searchSL;
+                searchAndSortBySchool(root, searchSL);
+            }
+            default:
+            {
+                cout << "输入错误！" << endl;
+                break;
+            }
+            }
+            break;
+        }
+
+        case 2:
+        {
+            cout << "请输入你想删除队伍的ID" << endl;
+            int deleteId;
+            cin >> deleteId;
+            root = deleteNode(root, deleteId);
+            InOderTraverse(root);
+            break;
+        }
+        case 3:
+        {
+            event newEvent;
+            cout << "请输入队伍信息，以#分隔：" << endl;
+            string line;
+            cin.ignore(); // 忽略之前输入的换行符
+            getline(cin, line);
+            try {
+                newEvent = parseLine(line);
+            }
+            catch (const exception& e) {
+                cerr << e.what() << ": " << line << endl;
+                continue;
+            }
+            root = addNode(root, newEvent);
+            cout << buf << endl;
+            InOderTraverse(root);
+            break;
+        }
+        case 4:
+        {
+            cout << "请输入想要修改信息的队伍编号" << endl;
+            int searchId;
+            cin >> searchId;
+            Tree_Node* foundNode = search_id(root, searchId, 1);
+            if (foundNode != nullptr) {
+                cout << "这个编号的队伍是： " << searchId << endl;
+                cout << buf << endl;
+                cout << foundNode->data.id << "\t" << foundNode->data.name << "\t" << foundNode->data.school << "\t" << foundNode->data.category << "\t" << foundNode->data.participant << "\t" << foundNode->data.teacher << endl;
+                cout << "请输入你想要修改的信息：" << endl;
+                cout << "修改参赛作品名称" << endl;
+                cin >> foundNode->data.name;
+                cout << "修改参赛学校" << endl;
+                cin >> foundNode->data.school;
+                cout << "修改参赛类别" << endl;
+                cin >> foundNode->data.category;
+                cout << "修改参赛者" << endl;
+                cin >> foundNode->data.participant;
+                cout << "修改参赛作品指导老师" << endl;
+                cin >> foundNode->data.teacher;
+            }
+            cout << buf << endl;
+            InOderTraverse(root);
+            cout << "修改成功!" << endl;
+            break;
+        }
+        case 5:
+        {
+ /*           Tree_Node* Call_team = nullptr;
+            callTeams(Call_team);
+            cout << endl;*/
+            cout << "正在施工。。。" << endl;
+            break;
+        }
+        case 6:
+        {
+            Map map;
+
+            map.addLandmark(Landmark("行政楼", "1", "行政楼：长山校区的指挥中心"));
+            map.addLandmark(Landmark("海韵湖", "2", "海韵湖：我们至今仍未知道为什么乐跑频频刷到鸡爪湖"));
+            map.addLandmark(Landmark("图书馆", "3", "图书馆：养育了一代代考研人，内卷聚集地"));
+            map.addLandmark(Landmark("东食堂", "4", "东食堂：附近大学生赖以生存的物资补给"));
+            map.addLandmark(Landmark("东操场", "5", "东操场：承接项目：散步，体测，大小社团活动"));
+            map.addLandmark(Landmark("南门", "6", "南门：对面是北门"));
+            map.addLandmark(Landmark("文体中心", "7", "文体中心：当代大学生磨练武艺，强健体魄的圣地"));
+            map.addLandmark(Landmark("西操场", "8", "西操场：承接项目：校运会，体测，大小社团活动"));
+            map.addLandmark(Landmark("经世楼", "9", "经世楼：“‘督学，明德，经世，致用’里的老三”"));
+            map.addLandmark(Landmark("文理大楼", "10", "文理大楼：到达长山校区最高峰！"));
+            map.addLandmark(Landmark("西食堂", "11", "西食堂：附近大学生赖以生存的物资补给"));
+            map.addLandmark(Landmark("西宿舍区", "12", "西宿舍区：这里生活着一群英勇无畏的大学生"));
+
+            map.addPath(Path("1", "2", 300));
+            map.addPath(Path("1", "10", 700));
+            map.addPath(Path("2", "3", 600));
+            map.addPath(Path("3", "10", 400));
+            map.addPath(Path("3", "4", 100));
+            map.addPath(Path("4", "5", 100));
+            map.addPath(Path("5", "6", 250));
+            map.addPath(Path("6", "7", 250));
+            map.addPath(Path("7", "8", 100));
+            map.addPath(Path("8", "9", 100));
+            map.addPath(Path("9", "10", 100));
+            map.addPath(Path("3", "8", 550));
+            map.addPath(Path("4", "7", 550));
+            map.addPath(Path("6", "12", 700));
+            map.addPath(Path("7", "11", 300));
+            map.addPath(Path("8", "11", 250));
+            map.addPath(Path("11", "12", 200));
+
+
+            const wchar_t* imagePath = L"rpg.jpg";
+            HINSTANCE result = ShellExecuteW(NULL, L"open", imagePath, NULL, NULL, SW_SHOW);
+            if ((INT_PTR)result <= 32)
+                {
+                 MessageBoxW(NULL, L"无法打开图片", L"错误", MB_OK | MB_ICONERROR);
+                 return 1;
+                }
+            while (true) {
+
+                cout << "请选择功能：" << endl;
+                cout << "1. 查询景点介绍" << endl;
+                cout << "2. 查询两个景点之间的最短路径" << endl;
+                cout << "3. 查询多个景点之间的最短路径" << endl;
+                cout << "0. 退出" << endl;
+
+                int choice_2;
+                std::cin >> choice_2;
+
+                if (choice_2 == 0) {
+                    break;
+                }
+                else if (choice_2 == 1) {
+                    string code;
+                    cout << "请输入景点编号: ";
+                    cin >> code;
+
+                    string description = map.getLandmarkDescription(code);
+                    if (!description.empty()) {
+                        cout << "景点介绍: " << description << endl;
+                    }
+                    else {
+                        cout << "未找到对应的景点信息" << endl;
+                    }
+                }
+                else if (choice_2 == 2) {
+                    string start, end;
+                    cout << "请输入起始景点编号: ";
+                    cin >> start;
+                    cout << "请输入目标景点编号: ";
+                    cin >> end;
+
+                    pair<vector<std::string>, int> result = map.navigate(start, end);
+                    vector<string> path = result.first;
+                    int totalWeight = result.second;
+
+                    if (!path.empty()) {
+                        cout << "最短路径为: ";
+                        for (const string& code : path) {
+                            std::string name = map.getLandmarkName(code);
+                            std::cout << name << " -> ";
+                        }
+                        cout << "总距离: " << totalWeight << endl;
+                    }
+                    else {
+                        cout << "无法找到起始景点或目标景点" << endl;
+                    }
+                }
+                else if (choice_2 == 3) {
+                    int numLandmarks;
+                    cout << "请输入景点数量: ";
+                    cin >> numLandmarks;
+
+                    if (numLandmarks <= 1) {
+                        cout << "景点数量需大于1" << endl;
+                        continue;
+                    }
+
+                    std::vector<string> landmarkCodes;
+                    for (int i = 0; i < numLandmarks; i++) {
+                        string code;
+                        cout << "请输入第" << i + 1 << "个景点编号: ";
+                        cin >> code;
+                        landmarkCodes.push_back(code);
+                    }
+
+                    pair<vector<std::string>, int> result = map.navigateMultiple(landmarkCodes);
+                    vector<string> path = result.first;
+                    int totalWeight = result.second;
+
+                    if (!path.empty()) {
+                        cout << "最短路径为: ";
+                        for (const string& code : path) {
+                            string name = map.getLandmarkName(code);
+                            cout << name << " -> ";
+                        }
+                        cout << "总距离: " << totalWeight << endl;
+                    }
+                    else {
+                        cout << "无法找到指定的景点或路径" << endl;
+                    }
+                }
+                else {
+                    cout << "无效的选择" << endl;
+                }
+            }
+
+        }
+        case 0:
+            return 0;
+        default:
+        {
+            cout << "输入错误！" << endl;
+            break;
+        }
+        }
+    }
+    function<void(Tree_Node*)> deleteTree = [&](Tree_Node* node) {
+        if (node == nullptr) return;
+        deleteTree(node->left);
+        deleteTree(node->right);
+        delete node;
+    };
+
+    deleteTree(root);
+
+    return 0;
+}
