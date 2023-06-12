@@ -1,0 +1,599 @@
+
+目录
+计算机设计大赛省级赛管理系统	1
+1 参赛队伍管理	2
+1.1 问题分析	2
+1.2 算法设计	3
+1.3 算法实现	5
+1.4 实验结果	8
+2 基于二叉排序树的查找	10
+2.1 问题分析	10
+2.2 算法设计	11
+2.3 算法实现	11
+2.4 实验结果	13
+3 参赛团队查询	14
+3.1 问题分析	14
+3.2 算法设计	14
+3.3 算法实现	15
+3.4 实验结果	16
+4 决赛叫号模拟	17
+4.1 问题分析	18
+4.2 算法设计	18
+4.3 算法实现	18
+4.4 实验结果	21
+5 校园导航	22
+5.1 问题分析	22
+5.2 算法设计	23
+5.3 算法实现	23
+5.4 实验结果	27
+心得体会	27
+
+ 
+中国大我计算机设计大赛省级赛事管理系统
+中国大我计算机设计大赛是我国高校面向本科生的计算机应用设计大赛，大赛旨在激发我学习计算机知识和技能的兴趣与潜能，提高我运用信息技术解决实际问题的综合能力。通过大赛这种计算机教学实践形式，可展示师生的教与学成果，最终以赛促学，以赛促教，以赛促创。该赛事在历届我中影响力较大，参与者众多，请结合2021届省赛参赛的数据，借助数据结构课程所学的相关知识，通过对数据的处理和分析，全面了解赛事组织及管理的体系，以及数据结构设计及数据处理在信息管理系统中应用的重要性。赛事相关数据存储在文本文件和excel文件中，相应的文件信息说明如表1所示。其中，各个文件中不同的数据项之间均使用#分隔，图1中给出了文件team.txt中参赛信息的对应数据示例。
+ 
+                      图1. 参赛队基本信息
+【问题描述】
+  要求协助中国大我计算机设计大赛江苏省组委会，设计一款赛事管理系统，实现赛务相关的数据管理及信息服务，该系统能够为省级赛事管理解决以下问题：
+（1）从team.txt中读取参赛队伍的基本信息，能够管理各参赛队的基本信息（包含参赛队编号，参赛作品名称，参赛学校，赛事类别，参赛者，指导老师），赛事类别共11项（参见大赛官网jsjds.blcu.edu.cn）；包括增加、删除、修改参赛队伍的信息。
+（2）实现基于二叉排序树的查找。根据提示输入参赛队编号，若查找成功，输出该赛事类别对应的基本信息（参赛作品名称、参赛学校、赛事类别、参赛者和指导老师信息），同时，输出查找成功时的平均查找长度ASL；否则，输出“查找失败！”。请输出ASL的计算表达式和结果值。
+（3）能够提供按参赛学校查询参赛团队，根据提示输入参赛学校名称，若查找成功，输出该学校参赛的所有团队的基本信息，输出的参赛团队需有序输出（按参赛队编号）。（排序算法可从选择排序、插入排序、希尔排序、归并排序、堆排序中任意选择，并为选择算法的原因做出说明。）
+（4）为省赛现场设计一个决赛叫号系统。所有参赛队按赛事组织文件中的赛事类别分到9个决赛室，决赛室按顺序叫号，被叫号参赛队进场，比赛结束后，下一参赛队才能进赛场。请模拟决赛叫号系统，演示省赛现场各决赛室的参赛队进场情况。（模拟时，各参赛队进场比赛时间可设为0.5秒）
+（5）赛事系统为参赛者提供赛地的校园导游程序。为参赛者提供各种路径导航的查询服务。以我校长山校区提供比赛场地为例，（请为参赛者提供不少于10个目标地的导航。可为参赛者提供校园地图中任意目标地（建筑物）相关信息的查询；提供图中任意目标地（建筑物）的问路查询，即查询任意两个目的地（建筑物）之间的一条最短的简单路径。
+1  参赛队伍管理
+从team.txt中读取参赛队伍的基本信息，能够管理各参赛队的基本信息（包含参赛队编号，参赛作品名称，参赛学校，赛事类别，参赛者，指导老师），赛事类别共11项（参见大赛官网jsjds.blcu.edu.cn）；包括增加、删除、修改参赛队伍的信息。
+1.1 问题分析
+读取team.txt文件中存储的参赛队伍基本信息，对这些信息进行增加、删除、修改等操作，以实现对参赛队伍基本信息的管理。
+要解决这个问题，可以考虑以下几个步骤：
+（1）定义参赛队伍基本信息的数据结构，包括参赛队编号、参赛作品名称、参赛学校、赛事类别、参赛者、指导老师等属性，以便于对这些信息进行操作。
+（2）读取team.txt文件中的参赛队伍基本信息，并将其存储为一个数据结构，可以考虑使用c++中的<fstream><sstream>文件读取函数，在读取文件时对读入的每条信息进行解析，以构建一个包含所有参赛队伍基本信息的数据结构。
+（3）实现各种对参赛队伍基本信息的操作，包括增加、删除、修改等操作。这些操作需要实现相应的函数或方法，以便于在程序中进行调用。
+（4）编写主程序，提供一个用户界面，让用户可以通过命令行或图形界面方式对参赛队伍基本信息进行管理。用户可以通过输入命令来添加、删除或修改参赛队伍基本信息，也可以通过输入查询指令来查询参赛队伍基本信息。
+1.2算法设计
+结点信息的数据结构：结构体Team用于存储各个结点的详细信息，如参赛队编号，参赛作品名称，参赛学校，赛事类别，参赛者，指导老师。
+/定义储存team的一个结构体
+struct event {
+    int id;
+    string name;
+    string school;
+    string category;
+    string participant;
+    string teacher;
+}; 
+声明二叉树结构，为构建二叉排序树做准备
+
+//二叉树结构体
+struct Tree_Node {
+    event data;
+    Tree_Node* left;
+    Tree_Node* right;
+};
+下面是对文档进行操作的数据结构：我们通过对文档直接操作，使用fstream库从赛事文件里读取数据并直接构建二叉排序树。向文档中增加数据，增添二叉树节点后将数据使用 ofstream增加到文件中，对于删除数据可以先查找参赛队伍编号，然后存入vector类型的变量中，然后，就可以根据编号，删除数据，然后再写入文件中，而修改操作，可以把增加和删除操作合起来。
+
+1.3算法实现
+
+//增加参赛队伍信息功能
+Tree_Node* addNode(Tree_Node* root, event data) {
+    if (root == nullptr) {
+        Tree_Node* newNode = new Tree_Node{ data, nullptr, nullptr };
+        return newNode;
+    }
+
+    if (data.id < root->data.id) {
+        root->left = addNode(root->left, data);
+    }
+    else {
+        root->right = addNode(root->right, data);
+    }
+
+    return root;
+}
+
+//跳过并输出第一行    
+char buf[1024];
+ifstream& seek_to_line(ifstream& in, int line)
+//将打开的文件in，定位到line行。
+{
+    int i;
+    in.seekg(0, ios::beg);  //定位到文件开始
+    for (i = 0; i < line; i++)
+    {
+        in.getline(buf, sizeof(buf));//读取行
+    }
+    cout << buf << endl;
+    return in;
+}
+//从team中读取的数据
+event parseLine(string line) {
+    event c;
+    stringstream ss(line);
+    string field;
+
+    if (getline(ss, field, '#')) {
+        c.id = stoi(field);
+    }
+    else {
+        throw runtime_error("Missing id");
+    }
+
+    if (getline(ss, c.name, '#')) {
+        c.name.erase(remove_if(c.name.begin(), c.name.end(), ::isspace), c.name.end());
+    }
+    else {
+        throw runtime_error("Missing name");
+    }
+
+    if (getline(ss, c.school, '#')) {
+        c.school.erase(remove_if(c.school.begin(), c.school.end(), ::isspace), c.school.end());
+    }
+    else {
+        throw runtime_error("Missing school");
+    }
+
+    if (getline(ss, c.category, '#')) {
+        c.category.erase(remove_if(c.category.begin(), c.category.end(), ::isspace), c.category.end());
+    }
+    else {
+        throw runtime_error("Missing category");
+    }
+
+    if (getline(ss, c.participant, '#')) {
+        c.participant.erase(remove_if(c.participant.begin(), c.participant.end(), ::isspace), c.participant.end());
+    }
+    else {
+        throw runtime_error("Missing participant");
+    }
+
+    if (getline(ss, c.teacher, '#')) {
+        c.teacher.erase(remove_if(c.teacher.begin(), c.teacher.end(), ::isspace), c.teacher.end());
+    }
+    else {
+        throw runtime_error("Missing teacher");
+    }
+
+    return c;
+}
+
+//根据id删除队伍
+Tree_Node* deleteNode(Tree_Node* root, int id) {
+    if (root == nullptr) {
+        return nullptr;
+    }
+
+    if (id < root->data.id) {
+        root->left = deleteNode(root->left, id);
+    }
+    else if (id > root->data.id) {
+        root->right = deleteNode(root->right, id);
+    }
+    else {
+        if (root->left == nullptr) {
+            Tree_Node* temp = root->right;
+            delete root;
+            return temp;
+        }
+        else if (root->right == nullptr) {
+            Tree_Node* temp = root->left;
+            delete root;
+            return temp;
+        }
+
+        Tree_Node* temp = root->right;
+        while (temp->left != nullptr) {
+            temp = temp->left;
+        }
+
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->data.id);
+    }
+
+    return root;
+}
+1.4实验结果
+增加数据操作：
+ 
+ 
+删除数据操作：
+ 
+ 
+ 
+修改数据：
+ 
+  
+2、查找队伍信息
+从team.txt中读取参赛队伍的基本信息，实现查找功能。根据提示输入参赛队编号，若查找成功，输出该赛事类别对应的基本信息（参赛作品名称、参赛学校、赛事类别、参赛者和指导老师信息），同时，输出查找成功时的平均查找长度ASL；否则，输出“查找失败！”。
+2.1 问题分析
+数据结构：要实现从文件中读取数据并进行查找，我们可以把数据全部插入二叉排序树当中，然后通过二叉排序数进行搜素，最后输出结果。
+数据存储格式：我们需要考虑从文件中读取的数据格式，例如，文件中的每一行可能包含参赛队编号、参赛作品名称、参赛学校、赛事类别、参赛者和指导老师的信息，因此我们需要考虑如何适配这些信息并将其存储到vector容器同时还有二叉排序树当中。
+输入与输出：要实现查找功能，需要提示用户输入参赛队编号，并根据查找结果进行输出。当查找成功时，我们需要输出相关基本信息和平均查找长度（即遍历次数），否则输出“查找失败！”。
+2.2 算法设计
+从team.txt文件中读取参赛队伍的基本信息，并将其存储在vector容器中，键为参赛队编号，值为一个结构体或其他类型的对象，存储参赛队的其他基本信息。
+提示用户输入参赛队编号，通过比较输入的编号和，并将其输出。
+如果查找成功，计算平均查找长度ASL，即查找过程中的遍历次数，可通过记录每次遍历的次数并除以总查找次数得到，输出结果。
+如果查找失败，输出“查找失败！
+2.3 算法实现
+
+void InOderTraverse(Tree_Node* bst)//按照中序排列输出
+{
+    if (bst == nullptr) return;
+    if (nullptr != bst)
+    {
+        if (bst->left) InOderTraverse(bst->left);
+        cout << bst->data.id << "\t" << bst->data.name << "\t" << bst->data.school << "\t" << bst->data.category << "\t" << bst->data.participant << "\t" << bst->data.teacher << endl;
+        if (bst->right) InOderTraverse(bst->right);
+    }
+}
+//根据id查找队伍
+//记录查找长度
+int findDepthSum, findNum;
+Tree_Node* search_id(Tree_Node* root, int id, int depth) {
+    if (root == nullptr || root->data.id == id) {
+        findDepthSum += depth;
+        return root;
+    }
+
+    if (id < root->data.id) {
+        return search_id(root->left, id, depth + 1);
+    }
+    else {
+        return search_id(root->right, id, depth + 1);
+    }
+}
+
+}
+2.4 实验结果
+
+ 
+3、参赛队伍查询
+能够提供按参赛学校查询参赛团队（或根据赛事类别查询参赛团队），即，根据提示输入参赛学校名称（赛事类别），若查找成功，输出该学校参赛的（该赛事类别的）所有团队的基本信息，输出的参赛团队按赛事类别有序输出。（排序算法可从选择排序、插入排序、希尔排序、归并排序、堆排序中任意选择，并为选择算法的原因做出说明。）
+3.1 问题分析
+数据结构：对于按参赛学校查询的情况，我们可以使用一个vector容器存储符合条件的参赛团队的指针，对于按赛事类别查询的情况，我可以用一个vector类型的变量来存储符合条件的队伍编号。
+数据存储格式：在从team.txt文件中读取数据时，我们需要根据输入提示选择读取参赛学校或者赛事类别的信息，并将其存储在对应容器中。在存储时，可以将参赛团队存储为一个结构体或其他类型的对象，存储其基本信息以及所对应的参赛学校或赛事类别等信息。
+查找与排序：对于按参赛学校查询，我们需要遍历完整容器来寻找符合条件的参赛团队；对于按赛事类别查询，我们可以直接使用teamID容器根据键值查找符合条件的参赛团队，以提高查询效率。对于排序，我们可以选择各种排序算法，例如选择排序、插入排序、希尔排序、归并排序、堆排序等，其中选择排序和插入排序适合小规模数据，而希尔排序和归并排序适合中等数据规模，堆排序适合大规模数据。我们可以根据实际情况选择排序算法，并输出排序算法选择的原因。
+输出结果：我们按赛事类别有序输出结果，可以使用插入排序算法将参赛团队按赛事类别排序后输出结果。
+错误处理：需要考虑各种可能发生的错误情况并进行相应的异常处理，例如无法打开或读取文件、用户输入非法的参赛学校名称或赛事类别等情况需提示用户并进行相应的处理。
+3.2 算法设计
+提示用户输入参赛学校名称（或赛事类别），遍历vector容器，查找该学校所有参赛团队的基本信息。
+如果查找成功，将所有查找到的参赛团队的基本信息保存在一个新的vector容器中，并按赛事类别排序输出，输出格式与问题描述中要求的格式相同。使用插入排序。
+如果查找失败，输出“查找失败！”。
+3.3 算法实现
+// 收集学校队伍信息到容器中
+void collect_school(Tree_Node* root, vector<event>& teams) {
+    if (root == nullptr) {
+        return;
+    }
+    teams.push_back(root->data);
+    collect_school(root->left, teams);
+    collect_school(root->right, teams);
+}
+
+// 根据学校查找队伍信息并选择排序（按序号从小到大）
+void searchAndSortBySchool(Tree_Node* root, string school_name) {
+    if (root == nullptr) {
+
+        return;
+    }
+
+    if (root->data.school == school_name) {
+        vector<event> teams;
+        collect_school(root, teams);
+        if (!teams.empty()) {
+            cout << "队伍信息如下：" << endl;
+            sort(teams.begin(), teams.end(), [](const event& a, const event& b) {
+                return a.id < b.id;
+                });
+
+            for (const auto& team : teams) {
+                cout << team.id << "\t" << team.name << "\t" << team.school << "\t" << team.category << "\t" << team.participant << "\t" << team.teacher << endl;
+            }
+        }
+        else {
+            cout << "没有找到该学校的队伍信息" << endl;
+        }
+        return;
+    }
+
+    searchAndSortBySchool(root->left, school_name);
+    searchAndSortBySchool(root->right, school_name);
+}
+3.4 实验结果
+ 
+4、决赛叫号模拟
+为省赛现场设计一个决赛叫号系统。所有参赛队按赛事组织文件中的赛事类别分到9个决赛室，决赛室按顺序叫号，被叫号参赛队进场，比赛结束后，下一参赛队才能进赛场。请模拟决赛叫号系统，演示省赛现场各决赛室的参赛队进场情况。（模拟时，要能直观展示叫号顺序与进场秩序一致）
+4.1 问题分析
+参赛队信息的存储：我们需要读取赛事组织文件中的参赛队信息，并将其存储在程序中。
+使用vector变量来存取这些参赛队的赛事类别。
+决赛室的模拟：为了模拟各决赛室的叫号和进场情况，我们可以使用vector来存储待叫号的参赛队的信息。将这些变量按照三个赛事类别来划分到一个赛区，如果有剩余的赛事类别，那么就4个赛事类别来划分到一个赛区。
+叫号顺序和进场秩序的模拟：可以使用循环来实现叫号和进场的模拟。我们先输入你想查询的赛区，然后让这个赛区的参赛队伍按照每秒来读出参赛的顺序。
+4.2 算法设计
+读取赛事组织文件中的参赛队信息，将其按照赛事类别分到各个决赛室的待叫号队列中。
+先选择赛区，看看是要拿输出哪个赛区。
+此时输出赛区的数字，然后输出赛区的叫号顺序，然后开始叫号后，一秒一秒地输出赛区的参赛队伍编号。
+4.3 算法实现
+//赛区分类
+void Call_Team(vector<event> team)
+{
+    vector<string> call_team;
+    for (int i = 0; i < team.size(); i++)
+    {
+        if (std::find(call_team.begin(), call_team.end(), team[i].category()) == call_team.end())
+        {
+            call_team.push_back(team[i].category);
+        }
+        
+    }
+    for (int i = 0; i < call_team.size(); i++)
+    {
+        for (int m = 0; m < team.size(); m++)
+        {
+            if (i < 3)
+            {
+                if (call_team[i] ==team[m].category)
+                    room1.push_back(team[m]);
+            }
+            if (i>=3&&i<=5)
+            {
+                if (call_team[i] == team[m].category)
+                    room2.push_back(team[m]);
+            }
+            if (i >= 6 && i <= 8)
+            {
+                if (call_team[i] == team[m].category)
+                    room3.push_back(team[m]);
+            }
+            if (i >= 9 && i <= 11)
+            {
+                if (call_team[i] == team[m].category)
+                    room4.push_back(team[m]);
+            }
+            if (i >= 12 && i <= 14)
+            {
+                if (call_team[i] == team[m].category)
+                    room5.push_back(team[m]);
+            }
+            if (i >= 15 && i <= 18)
+            {
+                if (call_team[i] == team[m].category)
+                    room6.push_back(team[m]);
+            }
+            if (i >= 19 && i <= 22)
+            {
+                if (call_team[i] == team[m].category)
+                    room7.push_back(team[m]);
+            }
+            if (i >= 23 && i <= 26)
+            {
+                if (call_team[i] == team[m].category)
+                    room8.push_back(team[m]);
+            }
+            if (i >= 27 && i < call_team.size())
+            {
+                if (call_team[i] == team[m].category)
+                    room9.push_back(team[m]);
+            }
+        }
+    }
+}
+
+//获得你想要的赛区
+vector<event> search_zone(int i)
+{
+    if (i == 1)
+        return room1;
+    if (i == 2)
+        return room2;
+    if (i == 3)
+        return room3;
+    if (i == 4)
+        return room4;
+    if (i == 5)
+        return room5;
+    if (i == 6)
+        return room6;
+    if (i == 7)
+        return room7;
+    if (i == 8)
+        return room8;
+    if (i == 9)
+        return room9;
+}
+
+//进场顺序
+void Approach_sequence(vector<event>& team)
+{
+    for (int i = 0; i < team.size(); i++)
+    {
+        cout<<"第"<<i+1<<" 个队伍编号为：" <<team[i].id << endl;
+    }
+}
+
+//模拟叫号
+void Call_system(vector<event> team)
+{
+    cout<<"模拟叫号如下： " << endl;
+    int i = 0;
+    while (i < team.size())
+    {
+        cout << "第" << i+1 << "次叫到的编号为：" << team[i].id<< endl;
+        Sleep(2000);
+        i++;
+    }
+}4.4 实验结果
+ 
+5  校园导游咨询
+赛事系统为参赛者提供赛地的校园导游程序。为参赛者提供各种路径导航的查询服务。以我校长山校区提供比赛场地为例，（请为参赛者提供不少于10个目标地的导航。可为参赛者提供校园地图中任意目标地（建筑物）相关信息的查询；提供图中任意目标地（建筑物）的问路查询，即查询任意两个目的地（建筑物）之间的一条最短的简单路径。
+5.1 问题分析
+1.校园导游服务
+需要提供不少于10个目标地 (建筑物) 的导航服务，以方便参赛者快速了解各个目标地在校园中的位置和基本信息，例如目标地的建筑名称、用途、周边环境等。
+可以考虑利用校园地图等资源，将目标地点和参赛者当前位置进行匹配，并提供路径规划服务，以便参赛者尽快到达目标地点。
+2.路径导航查询服务
+选用djk算法来求最小路径：即从任意结点出发到其它所有结点的最短路径。 
+5.2算法设计
+收集和整理目标地点 (建筑物) 的地理位置和基本信息，输入到无向带权图当中。
+利用地图数据和GPS等技术，获取参赛者当前的地理位置信息，并将其与目标地点信息匹配。
+比对匹配结果后，利用路径规划算法计算出从起点到终点的最短路径，并展示给参赛者。
+开始时提示参赛者输入起点和终点的目标地点 (建筑物) 名称或编号信息。
+下面给出校园景点的无向带权图：
+ 
+图1 校园景点的无向带权图
+5.3 算法实现
+//以下是导航系统
+// 导航系统
+
+// 地标结构体
+struct Landmark {
+    string name;         // 地标名称
+    string code;         // 地标代码
+    string description;  // 地标描述
+
+    Landmark() = default;  // 默认构造函数
+    Landmark(const string& name, const string& code, const string& description)
+        : name(name), code(code), description(description) {}
+};
+
+// 路径结构体
+struct Path {
+    string start;  // 起始地标代码
+    string end;    // 终点地标代码
+    int weight;    // 路径权重
+
+    Path(const string& start, const string& end, int weight)
+        : start(start), end(end), weight(weight) {}
+};
+
+// 地图类
+class Map {
+public:
+    // 添加地标
+    void addLandmark(const Landmark& landmark) {
+        landmarks[landmark.code] = landmark;
+    }
+
+    // 添加路径 
+    void addPath(const Path& path) {
+        paths[path.start][path.end] = path.weight;
+        paths[path.end][path.start] = path.weight;
+    }
+
+    // 获取地标描述
+    string getLandmarkDescription(const string& code) {
+        if (landmarks.count(code) > 0) {
+            return landmarks[code].description;
+        }
+        return "";
+    }
+
+    // 获取地标名称
+    string getLandmarkName(const std::string& code) {
+        if (landmarks.count(code) > 0) {
+            return landmarks[code].name;
+        }
+        return "";
+    }
+
+    // 导航函数，返回最短路径和总权重， 使用 Dijkstra 算法进行路径搜索
+    pair<vector<string>, int> navigate(const string& start, const string& end) {
+        
+        unordered_map<string, int> distance;          // 地标的距离
+        unordered_map<string, string> prev;            // 最短路径中的前驱节点
+        unordered_map<string, bool> visited;           // 记录节点的访问状态
+        priority_queue<pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> pq;  // 优先队列用于选择距离最短的节点
+
+        // 初始化距离、前驱节点和访问状态
+        for (auto& pair : landmarks) {
+            string code = pair.first;
+            distance[code] = INT_MAX;   // 初始化距离为无穷大
+            prev[code] = "";            // 前驱节点为空
+            visited[code] = false;      // 访问状态为未访问
+        }
+
+        distance[start] = 0;  // 起点到自身的距离为 0
+        pq.push(make_pair(0, start));  // 将起点加入优先队列
+
+        // 开始搜索最短路径
+        while (!pq.empty()) {
+            string current = pq.top().second;  // 获取当前距离最近的节点
+            pq.pop();
+
+            if (visited[current])
+                continue;
+
+            visited[current] = true;
+
+            if (current == end)
+                break;
+
+            // 遍历当前节点的相邻节点
+            if (paths.count(current) > 0) {
+                auto& neighbors = paths[current];
+
+                for (auto& pair : neighbors) {
+                    string neighbor = pair.first;
+                    int weight = pair.second;
+
+                    if (!visited[neighbor] && distance[current] + weight < distance[neighbor]) {
+                        distance[neighbor] = distance[current] + weight;
+                        prev[neighbor] = current;
+                        pq.push(make_pair(distance[neighbor], neighbor));
+                    }
+                }
+            }
+        }
+
+vector<string> shortestPath;  // 存储最短路径
+int totalWeight = distance[end];  // 总权重即为终点的最短距离
+
+        // 从终点往回回溯路径
+        if (prev[end] != "") {
+            string current = end;
+
+            while (current != "") {
+                shortestPath.push_back(current);
+                current = prev[current];
+            }
+
+            reverse(shortestPath.begin(), shortestPath.end());
+        }
+
+        return make_pair(shortestPath, totalWeight);
+    }
+
+    // 导航多个地标，返回整个路径和总权重
+    pair<vector<string>, int> navigateMultiple(const vector<string>& landmarks) {
+        vector<string> path;  // 路径
+        int totalWeight = 0;  // 总权重
+
+        if (landmarks.size() < 2)
+            return make_pair(path, totalWeight);
+
+        // 依次导航相邻的地标对
+        for (size_t i = 0; i < landmarks.size() - 1; i++) {
+            string start = landmarks[i];
+            string end = landmarks[i + 1];
+
+            // 导航两个地标之间的最短路径
+            pair<vector<string>, int> result = navigate(start, end);
+            vector<string> segmentPath = result.first;  // 分段路径
+            int segmentWeight = result.second;         // 分段权重
+
+            path.insert(path.end(), segmentPath.begin(), segmentPath.end());
+            totalWeight += segmentWeight;
+        }
+
+        return std::make_pair(path, totalWeight);
+    }
+
+private:
+    unordered_map<string, Landmark> landmarks;                // 地标集合
+    unordered_map<string, unordered_map<string, int>> paths; // 路径权重集合
+};
+
+5.4 实验结果
+ 
+心得体会
+数据结构是计算机科学的基础，“数据结构课程设计”是计算机科学与技术专业学生的集中实践性环节之一，是学习“数据结构”理论和实验课程后进行的一次全面的综合练习，对学生来说是非常重要的。其目的是要达到理论与实际应用相结合，提高学生组织数据及编写程序的能力，培养了我的问题解决能力、实践应用能力，使学生能够根据问题要求和数据对象的特性，学会数据组织的方法，把现实世界中的实际问题在计算机内部表示出来并用软件解决问题，巩固和拓展了基础知识。这些能力和经验对我的学习、职业发展和解决实际问题都具有重要的帮助和影响。
+数据结构课程设计要求我设计和实现具体的系统或算法，这需要我在实践中思考问题、分析需求，并通过合适的数据结构和算法解决问题。这样的训练可以培养我的问题解决能力，提高在面对复杂问题时的分析和解决能力。通过课程设计，我可以将课堂上学到的知识应用到实际问题中。通过设计和实现一个具体的系统或算法，我可以更深入地理解数据结构的原理和应用，并将其运用到实际工程中，提高自己的实践能力。
+提高编程能力：数据结构课程设计涉及到具体的编程实现，我运用编程语言来实现所设计的系统或算法。通过这样的实践，我提高了自己的编程能力，熟悉编程语言的使用和调试技巧，培养良好的编码风格和工程实践习惯。
+在使用基础知识的同时巩固与拓展自身：数据结构是计算机科学的基础，课程设计是对数据结构知识的实践应用。通过设计和实现，我可以巩固和拓展所学的数据结构知识，加深对其原理和应用的理解。这对于后续的算法设计、系统开发等高级课程和实践经验的积累都具有重要意义。
+通过这次数据结构课程设计，我不仅学到了许多关于数据结构的知识，还锻炼了实际应用这些知识的能力。我深入理解了二叉排序树、队列和图这些经典的数据结构，并学会了如何选择和应用不同的算法来解决具体的问题。这次设计让我更加熟悉了数据结构的实际应用场景，并培养了我的问题分析和解决能力。我相信这些经验对我的学习和职业发展都具有重要意义。
+
